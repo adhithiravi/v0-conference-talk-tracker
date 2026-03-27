@@ -8,6 +8,77 @@ import { SubmissionsList } from '@/components/submissions-list'
 import { Mic2 } from 'lucide-react'
 import type { TrackerData } from '@/lib/types'
 
+const sampleData: TrackerData = {
+  profile: {
+    name: 'Alex Chen',
+    title: 'Senior Software Engineer',
+    bio: 'Building scalable systems and sharing knowledge through conference talks. Passionate about developer experience, distributed systems, and helping teams ship better software faster.',
+    email: 'alex@example.com',
+    twitter: '@alexchen',
+    linkedin: 'alexchen-dev',
+    website: 'https://alexchen.dev',
+    photoUrl: '',
+  },
+  talks: [
+    {
+      id: '1',
+      title: 'Building Resilient Microservices',
+      abstract: 'Learn how to design and implement microservices that gracefully handle failures. We will cover circuit breakers, retry patterns, bulkheads, and observability strategies that keep your systems running smoothly even when things go wrong.',
+      tags: ['microservices', 'resilience', 'architecture'],
+    },
+    {
+      id: '2',
+      title: 'The Art of Code Review',
+      abstract: 'Code reviews are more than just finding bugs. This talk explores how to give constructive feedback, build team culture through reviews, and use automation to focus human attention where it matters most.',
+      tags: ['best-practices', 'teamwork', 'developer-experience'],
+    },
+    {
+      id: '3',
+      title: 'From Monolith to Modules',
+      abstract: 'A practical guide to incrementally modernizing legacy applications without the big rewrite. Learn strategies for identifying boundaries, strangling the monolith, and maintaining velocity during the transition.',
+      tags: ['architecture', 'legacy', 'refactoring'],
+    },
+  ],
+  submissions: [
+    {
+      id: '1',
+      conferenceName: 'DevConf 2024',
+      location: 'San Francisco, CA',
+      date: '2024-09-15',
+      talkId: '1',
+      status: 'accepted',
+      notes: 'Main stage, 45 min slot',
+    },
+    {
+      id: '2',
+      conferenceName: 'Tech Summit Europe',
+      location: 'Berlin, Germany',
+      date: '2024-10-20',
+      talkId: '2',
+      status: 'submitted',
+      notes: 'Waiting for CFP results',
+    },
+    {
+      id: '3',
+      conferenceName: 'CodeCon Asia',
+      location: 'Singapore',
+      date: '2024-11-08',
+      talkId: '1',
+      status: 'pending',
+      notes: 'CFP deadline next week',
+    },
+    {
+      id: '4',
+      conferenceName: 'Developer Days',
+      location: 'Austin, TX',
+      date: '2024-08-12',
+      talkId: '3',
+      status: 'rejected',
+      notes: 'Too many architecture talks this year',
+    },
+  ],
+}
+
 const emptyData: TrackerData = {
   profile: {
     name: '',
@@ -24,7 +95,7 @@ const emptyData: TrackerData = {
 }
 
 export default function Home() {
-  const [data, setData] = useState<TrackerData>(emptyData)
+  const [data, setData] = useState<TrackerData>(sampleData)
   const hasData = data.talks.length > 0 || data.submissions.length > 0 || data.profile.name !== ''
 
   return (
