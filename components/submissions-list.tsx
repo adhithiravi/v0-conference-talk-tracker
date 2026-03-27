@@ -11,10 +11,10 @@ interface SubmissionsListProps {
 }
 
 const statusColors: Record<ConferenceSubmission['status'], string> = {
-  submitted: 'bg-chart-1/20 text-chart-1 border-chart-1/30',
-  accepted: 'bg-green-500/20 text-green-400 border-green-500/30',
-  rejected: 'bg-destructive/20 text-destructive border-destructive/30',
-  pending: 'bg-chart-2/20 text-chart-2 border-chart-2/30',
+  submitted: 'bg-sky-100 text-sky-700 border-sky-300',
+  accepted: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+  rejected: 'bg-red-100 text-red-700 border-red-300',
+  pending: 'bg-amber-100 text-amber-700 border-amber-300',
 }
 
 export function SubmissionsList({ submissions, talks }: SubmissionsListProps) {
@@ -26,11 +26,9 @@ export function SubmissionsList({ submissions, talks }: SubmissionsListProps) {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'TBD'
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+      const [year, month, day] = dateStr.split('-').map(Number)
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      return `${months[month - 1]} ${day}, ${year}`
     } catch {
       return dateStr
     }
