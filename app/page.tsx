@@ -96,59 +96,41 @@ const emptyData: TrackerData = {
 
 export default function Home() {
   const [data, setData] = useState<TrackerData>(sampleData)
-  const hasData = data.talks.length > 0 || data.submissions.length > 0 || data.profile.name !== ''
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Mic2 className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Mic2 className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">
+                  Conference Talk Tracker
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Manage your talks and submissions
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">
-                Conference Talk Tracker
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Manage your talks and submissions
-              </p>
-            </div>
+            <FileUploader onDataLoaded={setData} />
           </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="space-y-6">
-          <FileUploader onDataLoaded={setData} hasData={hasData} />
+          <ProfileCard profile={data.profile} />
           
-          {hasData && (
-            <>
-              <ProfileCard profile={data.profile} />
-              
-              <div className="grid gap-6 lg:grid-cols-2">
-                <TalksList talks={data.talks} />
-                <SubmissionsList 
-                  submissions={data.submissions} 
-                  talks={data.talks} 
-                />
-              </div>
-            </>
-          )}
-
-          {!hasData && (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
-                <Mic2 className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">
-                Get Started
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Download the template above, fill it with your speaker profile, talks, and conference submissions, then upload it to view your data.
-              </p>
-            </div>
-          )}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <TalksList talks={data.talks} />
+            <SubmissionsList 
+              submissions={data.submissions} 
+              talks={data.talks} 
+            />
+          </div>
         </div>
       </main>
     </div>

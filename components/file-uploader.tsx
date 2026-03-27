@@ -1,21 +1,26 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { useCallback, useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Upload, FileSpreadsheet, Download, X } from 'lucide-react'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Upload, FileSpreadsheet, Download, X, Settings2 } from 'lucide-react'
 import { parseExcelFile, downloadTemplate } from '@/lib/excel-parser'
 import type { TrackerData } from '@/lib/types'
 
 interface FileUploaderProps {
   onDataLoaded: (data: TrackerData) => void
-  hasData: boolean
 }
 
-export function FileUploader({ onDataLoaded, hasData }: FileUploaderProps) {
+export function FileUploader({ onDataLoaded }: FileUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
@@ -30,6 +35,7 @@ export function FileUploader({ onDataLoaded, hasData }: FileUploaderProps) {
       const data = parseExcelFile(buffer)
       setFileName(file.name)
       onDataLoaded(data)
+      setOpen(false)
     } catch (err) {
       console.error('Error parsing Excel file:', err)
       setError('Failed to parse Excel file. Please check the format.')
@@ -62,90 +68,90 @@ export function FileUploader({ onDataLoaded, hasData }: FileUploaderProps) {
   const clearFile = () => {
     setFileName(null)
     setError(null)
+    if (inputRef.current) {
+      inputRef.current.value = ''
+    }
   }
 
   return (
-    <Card className="border-border bg-card">
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2">
+          <Settings2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Import Data</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-4">
+        <div className="space-y-4">
           <div>
-            <h3 className="font-medium text-foreground">Import Data</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Upload your Excel file or download the template to get started
+            <h4 className="font-medium text-foreground text-sm">Import Excel</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Upload your data or download a template
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={downloadTemplate}
-            className="shrink-0"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Download Template
-          </Button>
-        </div>
 
-        <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={`
-            relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-            ${isDragging 
-              ? 'border-primary bg-primary/5' 
-              : 'border-border hover:border-muted-foreground/50'
-            }
-          `}
-        >
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleInputChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-          
-          {fileName ? (
-            <div className="flex items-center justify-center gap-3">
-              <FileSpreadsheet className="h-8 w-8 text-primary" />
-              <div className="text-left">
-                <p className="font-medium text-foreground">{fileName}</p>
-                <p className="text-xs text-muted-foreground">File loaded successfully</p>
-              </div>
+          {fileName && (
+            <div className="flex items-center gap-2 p-2 rounded-md bg-secondary">
+              <FileSpreadsheet className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm text-foreground truncate flex-1">{fileName}</span>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  clearFile()
-                }}
-                className="ml-2"
+                onClick={clearFile}
+                className="h-6 w-6 p-0"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             </div>
-          ) : (
-            <>
-              <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-foreground font-medium">
-                Drop your Excel file here
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                or click to browse
-              </p>
-            </>
           )}
-        </div>
 
-        {error && (
-          <p className="text-sm text-destructive mt-3">{error}</p>
-        )}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => inputRef.current?.click()}
+            className={`
+              relative border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer
+              ${isDragging 
+                ? 'border-primary bg-primary/5' 
+                : 'border-border hover:border-muted-foreground/50'
+              }
+            `}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleInputChange}
+              className="hidden"
+            />
+            <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-xs text-foreground font-medium">
+              Drop Excel file or click
+            </p>
+          </div>
 
-        {hasData && (
-          <p className="text-xs text-muted-foreground mt-3">
-            Tip: The Excel file should have three sheets: Profile, Talks, and Submissions
+          {error && (
+            <p className="text-xs text-destructive">{error}</p>
+          )}
+
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={downloadTemplate}
+              className="flex-1"
+            >
+              <Download className="h-3 w-3 mr-1.5" />
+              Template
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Sheets: Profile, Talks, Submissions
           </p>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
