@@ -17,6 +17,10 @@ export async function getDemoTrackerData(): Promise<TrackerData> {
     supabase.from('conference_submissions').select('*').eq('user_id', DEMO_USER_ID),
   ])
 
+  console.log('[v0] Profile result:', profileResult)
+  console.log('[v0] Talks result:', talksResult)
+  console.log('[v0] Submissions result:', submissionsResult)
+
   const profile: Profile = profileResult.data ? {
     name: profileResult.data.name || '',
     title: profileResult.data.title || '',
