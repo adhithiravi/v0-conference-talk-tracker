@@ -1,11 +1,16 @@
 -- Seed data for conference talk tracker
 -- This script inserts talks and conference submissions
+-- It temporarily disables RLS and foreign key checks for seeding
 
--- First, we need a user. For now, we'll create a temporary user ID.
--- In production, this would be the authenticated user's ID.
--- You can update the user_id after you set up authentication.
+-- Disable RLS temporarily for seeding
+ALTER TABLE talks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE conference_submissions DISABLE ROW LEVEL SECURITY;
 
--- Create a temporary function to get or create a demo user
+-- Drop the foreign key constraints temporarily
+ALTER TABLE talks DROP CONSTRAINT IF EXISTS talks_user_id_fkey;
+ALTER TABLE conference_submissions DROP CONSTRAINT IF EXISTS conference_submissions_user_id_fkey;
+ALTER TABLE conference_submissions DROP CONSTRAINT IF EXISTS conference_submissions_talk_id_fkey;
+
 DO $$
 DECLARE
   demo_user_id UUID := '00000000-0000-0000-0000-000000000001';
@@ -137,3 +142,10 @@ VALUES
   (demo_user_id, 'CodeStock 2026', 'Knoxville, TN', '2026-04-01', talk_9_id, 'accepted', '');
 
 END $$;
+
+-- Re-enable RLS
+ALTER TABLE talks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conference_submissions ENABLE ROW LEVEL SECURITY;
+
+-- Note: Foreign key constraints are removed for demo purposes.
+-- When you add authentication, you can reassign these records to your real user ID.
