@@ -5,7 +5,7 @@ import type { Profile, Talk, ConferenceSubmission, TrackerData } from '@/lib/typ
 import { revalidatePath } from 'next/cache'
 
 // Demo user ID for seeded data (before auth is set up)
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000000'
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 // Fetch all data (demo mode - no auth required)
 export async function getDemoTrackerData(): Promise<TrackerData> {
