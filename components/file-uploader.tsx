@@ -1,26 +1,25 @@
 'use client'
 
 import { useCallback, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Upload, FileSpreadsheet, Download, X, Settings2 } from 'lucide-react'
+import { Upload, FileSpreadsheet, Download, X, Settings2, Loader2 } from 'lucide-react'
 import { parseExcelFile, downloadTemplate } from '@/lib/excel-parser'
-import type { TrackerData } from '@/lib/types'
+import { importDemoTrackerData } from '@/lib/actions'
 
-interface FileUploaderProps {
-  onDataLoaded: (data: TrackerData) => void
-}
-
-export function FileUploader({ onDataLoaded }: FileUploaderProps) {
+export function FileUploader() {
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
@@ -31,16 +30,23 @@ export function FileUploader({ onDataLoaded }: FileUploaderProps) {
     }
     
     try {
+      setIsLoading(true)
       const buffer = await file.arrayBuffer()
       const data = parseExcelFile(buffer)
       setFileName(file.name)
-      onDataLoaded(data)
+      
+      // Import to database
+      await importDemoTrackerData(data)
+      
       setOpen(false)
+      router.refresh()
     } catch (err) {
       console.error('Error parsing Excel file:', err)
       setError('Failed to parse Excel file. Please check the format.')
+    } finally {
+      setIsLoading(false)
     }
-  }, [onDataLoaded])
+  }, [router])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -116,6 +122,7 @@ export function FileUploader({ onDataLoaded }: FileUploaderProps) {
                 ? 'border-primary bg-primary/5' 
                 : 'border-border hover:border-muted-foreground/50'
               }
+              ${isLoading ? 'pointer-events-none opacity-50' : ''}
             `}
           >
             <input
@@ -124,11 +131,23 @@ export function FileUploader({ onDataLoaded }: FileUploaderProps) {
               accept=".xlsx,.xls"
               onChange={handleInputChange}
               className="hidden"
+              disabled={isLoading}
             />
-            <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-            <p className="text-xs text-foreground font-medium">
-              Drop Excel file or click
-            </p>
+            {isLoading ? (
+              <>
+                <Loader2 className="h-6 w-6 text-primary mx-auto mb-2 animate-spin" />
+                <p className="text-xs text-foreground font-medium">
+                  Importing...
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                <p className="text-xs text-foreground font-medium">
+                  Drop Excel file or click
+                </p>
+              </>
+            )}
           </div>
 
           {error && (
@@ -141,6 +160,7 @@ export function FileUploader({ onDataLoaded }: FileUploaderProps) {
               size="sm"
               onClick={downloadTemplate}
               className="flex-1"
+              disabled={isLoading}
             >
               <Download className="h-3 w-3 mr-1.5" />
               Template
